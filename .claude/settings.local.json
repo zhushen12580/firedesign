@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:tauri.app)",
+      "WebFetch(domain:www.electronjs.org)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(npm install:*)",
+      "Bash(rustc:*)",
+      "Bash(cargo --version:*)",
+      "Bash(cargo install:*)",
+      "Bash(cargo tauri:*)",
+      "Bash(cargo --list:*)",
+      "Read(//c/Users/22703/.cargo/bin/**)",
+      "Bash(node scripts/check-env.js:*)",
+      "Bash(npm test)",
+      "Bash(npm cache clean:*)",
+      "Bash(npm init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
