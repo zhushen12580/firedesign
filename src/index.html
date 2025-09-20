@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电商产品照片工具</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1>电商产品照片工具</h1>
+        </header>
+        <main class="app-main">
+            <div class="upload-area">
+                <p>拖拽图片到此处或点击上传</p>
+                <input type="file" id="file-input" accept="image/*" multiple>
+            </div>
+            <div class="template-selector">
+                <h2>选择模板</h2>
+                <div class="templates-container">
+                    <!-- 模板将通过JavaScript动态加载 -->
+                </div>
+            </div>
+            <div class="preview-area">
+                <h2>预览</h2>
+                <div class="image-preview">
+                    <!-- 预览图像将在这里显示 -->
+                </div>
+            </div>
+            <div class="controls">
+                <div class="ai-model-selector">
+                    <label for="ai-model">AI模型:</label>
+                    <select id="ai-model">
+                        <option value="doubao">Doubao-Seedream-4.0</option>
+                        <option value="nano">Nano Banana</option>
+                        <option value="deepseek">DeepSeek</option>
+                    </select>
+                </div>
+                <div class="optimization-input">
+                    <label for="optimization-text">优化描述:</label>
+                    <textarea id="optimization-text" placeholder="输入自然语言描述来优化图像..."></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button id="generate-btn">生成图像</button>
+                    <button id="export-btn">导出图像</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script type="module" src="main.ts"></script>
+</body>
+</html>
