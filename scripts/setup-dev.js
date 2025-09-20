@@ -33,16 +33,61 @@ function main() {
   console.log(`✓ Node.js 已安装: ${process.version}`);
 
   // 检查Rust
-  if (!checkIfExists(path.join(process.env.HOME || process.env.USERPROFILE, '.cargo', 'bin', 'rustc'))) {
+  const cargoBin = path.join(process.env.HOME || process.env.USERPROFILE, '.cargo', 'bin');
+  if (!checkIfExists(path.join(cargoBin, 'rustc.exe')) && !checkIfExists(path.join(cargoBin, 'rustc'))) {
     console.log('ⓘ 建议安装 Rust 以支持桌面应用开发');
   } else {
     console.log('✓ Rust 已安装');
   }
 
-  // 安装npm依赖
-  if (!runCommand('npm install', '安装npm依赖')) {
-    console.log('✗ npm依赖安装失败');
-    process.exit(1);
+  // 尝试不同的安装方法
+  console.log('\n尝试安装依赖...');
+
+  // 方法1: 使用自定义缓存目录
+  if (!runCommand('npm install --cache .npm-cache', '使用自定义缓存目录安装依赖')) {
+    console.log('ⓘ 尝试方法2: 清理缓存后安装');
+
+    // 方法2: 清理缓存后安装
+    try {
+      execSync('npm cache clean --force', { stdio: 'ignore' });
+      console.log('✓ npm缓存已清理');
+    } catch (error) {
+      console.log('ⓘ 无法清理npm缓存，跳过此步骤');
+    }
+
+    if (!runCommand('npm install', '安装npm依赖')) {
+      console.log('ⓘ 尝试方法3: 使用yarn安装依赖（如果已安装yarn）');
+
+      // 方法3: 使用yarn
+      try {
+        execSync('yarn --version', { stdio: 'ignore' });
+        if (!runCommand('yarn install', '使用yarn安装依赖')) {
+          console.log('✗ 所有安装方法都失败了');
+          console.log('\n建议:');
+          console.log('1. 以管理员身份运行命令提示符');
+          console.log('2. 或手动安装依赖:');
+          console.log('   - npm install @tauri-apps/api@^1.5.0');
+          console.log('   - npm install @tauri-apps/cli@^1.5.0');
+          console.log('   - npm install typescript@^5.0.0');
+          console.log('   - npm install vite@^5.0.0');
+          console.log('   - npm install jest@^29.0.0');
+          console.log('   - npm install @testing-library/jest-dom@^6.0.0');
+          process.exit(1);
+        }
+      } catch (error) {
+        console.log('✗ yarn未安装，无法使用yarn安装依赖');
+        console.log('\n建议:');
+        console.log('1. 以管理员身份运行命令提示符');
+        console.log('2. 或手动安装依赖:');
+        console.log('   - npm install @tauri-apps/api@^1.5.0');
+        console.log('   - npm install @tauri-apps/cli@^1.5.0');
+        console.log('   - npm install typescript@^5.0.0');
+        console.log('   - npm install vite@^5.0.0');
+        console.log('   - npm install jest@^29.0.0');
+        console.log('   - npm install @testing-library/jest-dom@^6.0.0');
+        process.exit(1);
+      }
+    }
   }
 
   console.log('\n✓ 开发环境设置完成');

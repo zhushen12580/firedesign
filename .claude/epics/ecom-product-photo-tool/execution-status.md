@@ -20,4 +20,4 @@ branch: epic/ecom-product-photo-tool
 - Issue #11: 测试和质量保证 (depends on #8, #9, #10)
 
 ## Completed
-- None yet
+- 桌面应用程序框架搭建 (Issue #1)

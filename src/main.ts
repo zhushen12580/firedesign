@@ -1,19 +1,22 @@
 // main.ts - 应用程序入口点
 import TemplateSelector from './components/TemplateSelector';
+import ImagePreview from './components/ImagePreview';
 import { fileToBase64 } from './utils/imageUtils';
+import { ImageProcessor } from './utils/imageProcessor';
 
 // 获取DOM元素
 const fileInput = document.getElementById('file-input') as HTMLInputElement;
 const uploadArea = document.querySelector('.upload-area') as HTMLDivElement;
 const templatesContainer = document.querySelector('.templates-container') as HTMLDivElement;
-const imagePreview = document.querySelector('.image-preview') as HTMLDivElement;
+const imagePreviewContainer = document.querySelector('.image-preview') as HTMLDivElement;
 const aiModelSelect = document.getElementById('ai-model') as HTMLSelectElement;
 const optimizationText = document.getElementById('optimization-text') as HTMLTextAreaElement;
 const generateBtn = document.getElementById('generate-btn') as HTMLButtonElement;
 const exportBtn = document.getElementById('export-btn') as HTMLButtonElement;
 
-// 创建模板选择器实例
+// 创建组件实例
 const templateSelector = new TemplateSelector(templatesContainer);
+const imagePreview = new ImagePreview(imagePreviewContainer);
 
 // 事件监听器
 uploadArea?.addEventListener('click', () => {
@@ -45,13 +48,35 @@ async function handleFileSelect(event: Event) {
   if (input.files && input.files[0]) {
     const file = input.files[0];
 
+    // 显示加载状态
+    imagePreview.showLoading();
+
+    // 验证图像文件
+    const validation = ImageProcessor.validateImageFile(file);
+    if (!validation.isValid) {
+      imagePreview.showError(validation.error || '文件验证失败');
+      return;
+    }
+
     try {
-      const base64 = await fileToBase64(file);
+      // 处理图像
+      const result = await ImageProcessor.processImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 0.8,
+        format: 'jpeg'
+      });
+
       // 显示预览图像
-      imagePreview!.innerHTML = `<img src="${base64}" alt="预览图像">`;
+      imagePreview.showImage(result.dataUrl, {
+        width: result.width,
+        height: result.height,
+        format: result.format,
+        size: result.size
+      });
     } catch (error) {
-      console.error('文件转换失败:', error);
-      alert('文件转换失败');
+      console.error('图像处理失败:', error);
+      imagePreview.showError('图像处理失败: ' + (error instanceof Error ? error.message : '未知错误'));
     }
   }
 }
