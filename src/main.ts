@@ -3,6 +3,8 @@ import TemplateSelector from './components/TemplateSelector';
 import ImagePreview from './components/ImagePreview';
 import { fileToBase64 } from './utils/imageUtils';
 import { ImageProcessor } from './utils/imageProcessor';
+import AIServiceAdapter from './services/AIServiceAdapter';
+import { ImageGenerationRequest } from './types/ai';
 
 // 获取DOM元素
 const fileInput = document.getElementById('file-input') as HTMLInputElement;
@@ -17,6 +19,8 @@ const exportBtn = document.getElementById('export-btn') as HTMLButtonElement;
 // 创建组件实例
 const templateSelector = new TemplateSelector(templatesContainer);
 const imagePreview = new ImagePreview(imagePreviewContainer);
+const aiServiceAdapter = new AIServiceAdapter();
+const aiManager = aiServiceAdapter.getAIManager();
 
 // 事件监听器
 uploadArea?.addEventListener('click', () => {
@@ -91,29 +95,55 @@ async function generateImage() {
   }
 
   // 获取选中的AI模型
-  const selectedModel = aiModelSelect?.value;
+  const selectedModel = aiModelSelect?.value as 'doubao' | 'nano' | 'deepseek';
 
   // 获取优化文本
   const optimizationPrompt = optimizationText?.value;
 
-  // 这里应该调用实际的AI API
-  console.log('生成图像:', {
-    templateId: selectedTemplateId,
-    model: selectedModel,
-    prompt: optimizationPrompt
-  });
+  if (!optimizationPrompt) {
+    alert('请输入优化描述');
+    return;
+  }
 
   // 显示生成中的状态
   generateBtn.textContent = '生成中...';
   generateBtn.disabled = true;
+  imagePreview.showLoading();
 
-  // 模拟API调用
-  setTimeout(() => {
-    // 模拟生成结果
-    imagePreview!.innerHTML = '<p>图像生成完成！</p>';
+  try {
+    // 构建图像生成请求
+    const request: ImageGenerationRequest = {
+      prompt: optimizationPrompt,
+      model: selectedModel,
+      options: {
+        width: 512,
+        height: 512,
+        quality: 0.8
+      }
+    };
+
+    // 调用AI服务生成图像
+    const response = await aiManager.generateImage(request);
+
+    if (response.success && response.imageUrl) {
+      // 显示生成的图像
+      imagePreview.showImage(response.imageUrl, {
+        width: 512,
+        height: 512,
+        format: 'jpeg',
+        size: 0 // 实际大小需要从图像数据中获取
+      });
+    } else {
+      imagePreview.showError(response.error || '图像生成失败');
+    }
+  } catch (error) {
+    console.error('图像生成失败:', error);
+    imagePreview.showError('图像生成失败: ' + (error instanceof Error ? error.message : '未知错误'));
+  } finally {
+    // 恢复按钮状态
     generateBtn.textContent = '生成图像';
     generateBtn.disabled = false;
-  }, 2000);
+  }
 }
 
 // 导出图像函数
